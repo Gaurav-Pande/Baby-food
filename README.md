@@ -10,6 +10,7 @@ The React frontend uses two service modules to communicate with the MCP server:
 
 - **`mcpService.ts`**: Handles saving analysis results and fetching analysis history. After receiving the analysis result, the frontend calls `saveAnalysisResult` to persist it (via the `/save` endpoint), and uses `fetchAnalysisHistory` to retrieve past results (via the `/history` endpoint).
 
+```
 [Browser/React App]
      |
      |  (calls analyzeIngredients in analysisService.ts)
@@ -19,6 +20,7 @@ The React frontend uses two service modules to communicate with the MCP server:
      |  (calls saveAnalysisResult, fetchAnalysisHistory in mcpService.ts)
      |
 [mcpService.ts]  --HTTP-->  [MCP Server (server.js) on :3001]
+```
 
 **The server never calls these services directly—they are HTTP clients used by the frontend.**
 
