@@ -1,5 +1,5 @@
 
-# Baby Food Analyzer
+# Baby Food Analyzer(NutriTot)
 
 A modern web application that analyzes baby food ingredients for toddlers (1–3 years) using OCR, AI, and the Model Context Protocol (MCP) pattern.
 
@@ -7,7 +7,7 @@ A modern web application that analyzes baby food ingredients for toddlers (1–3
 
 ## Table of Contents
 
-- [Baby Food Analyzer](#baby-food-analyzer)
+- [Baby Food Analyzer(NutriTot)](#baby-food-analyzernutritot)
   - [Table of Contents](#table-of-contents)
   - [What is MCP?](#what-is-mcp)
   - [MCP Terminology in This Solution](#mcp-terminology-in-this-solution)
