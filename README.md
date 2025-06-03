@@ -1,35 +1,85 @@
+
 # Baby Food Analyzer
 
-A web application that analyzes baby food ingredients to determine if they're healthy for babies aged 1-3 years.
+A modern web application that analyzes baby food ingredients for toddlers (1–3 years) using OCR, AI, and the Model Context Protocol (MCP) pattern.
 
-## How the Frontend Services Work Together
+---
 
-The React frontend uses two service modules to communicate with the MCP server:
+## Table of Contents
 
-- **`analysisService.ts`**: Handles the initial ingredient analysis. When a user uploads or captures an image, the frontend extracts the text and calls `analyzeIngredients` from this service, which sends a POST request to the MCP server's `/analyze` endpoint. The server returns the analysis result.
+- [Baby Food Analyzer](#baby-food-analyzer)
+  - [Table of Contents](#table-of-contents)
+  - [What is MCP?](#what-is-mcp)
+  - [MCP Terminology in This Solution](#mcp-terminology-in-this-solution)
+    - [In-Context Example](#in-context-example)
+    - [Visual Mapping](#visual-mapping)
+  - [System Architecture](#system-architecture)
+    - [High-Level MCP System Diagram](#high-level-mcp-system-diagram)
+  - [How the Frontend and Backend Communicate](#how-the-frontend-and-backend-communicate)
+    - [Service Usage Flow](#service-usage-flow)
+  - [Features](#features)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+  - [Deployment](#deployment)
+  - [Technologies Used](#technologies-used)
+  - [License \& Disclaimer](#license--disclaimer)
 
-- **`mcpService.ts`**: Handles saving analysis results and fetching analysis history. After receiving the analysis result, the frontend calls `saveAnalysisResult` to persist it (via the `/save` endpoint), and uses `fetchAnalysisHistory` to retrieve past results (via the `/history` endpoint).
+---
 
+## What is MCP?
+
+**Model Context Protocol (MCP)** is a design pattern for building robust, AI-powered applications. It separates:
+- The **frontend** (UI, user input, display)
+- The **backend** (model orchestration, business logic, data storage)
+- The **protocol** (the contract for how frontend and backend communicate, including context, actions, and results)
+
+MCP ensures that LLMs (like OpenAI) are used behind a well-defined API, making your app maintainable and scalable.
+## MCP Terminology in This Solution
+
+Here’s how the general MCP concepts map to this project:
+
+| MCP Concept         | In This Solution (Baby Food Analyzer)                                                                 |
+|---------------------|------------------------------------------------------------------------------------------------------|
+| **MCP Host**        | The user’s web browser running the React app (the “host” that initiates analysis and history fetches) |
+| **MCP Client**      | The code in your React frontend (e.g., `analysisService.ts`, `mcpService.ts`) that sends HTTP requests to the MCP server |
+| **MCP Server**      | Your Node.js/Express backend (`server.js`) that exposes `/analyze`, `/save`, and `/history` endpoints |
+| **Local Data Source** | (Not used in this demo, but could be local files/databases if the server accessed them)              |
+| **Remote Service**  | The OpenAI API (LLM) and CosmosDB, which your MCP server connects to for analysis and storage         |
+
+### In-Context Example
+
+- **MCP Host:**  The React web app running in the user’s browser, where the user uploads images and views results.
+- **MCP Client:**  The frontend service modules (`analysisService.ts` and `mcpService.ts`) that communicate with the backend using the MCP protocol (HTTP+JSON).
+- **MCP Server:**  The Node.js/Express app (`server.js`) that receives requests, orchestrates LLM calls, and manages data storage.
+- **Local Data Source:**  (Not present in this solution, but if your server accessed files on disk or a local database, those would be local data sources.)
+- **Remote Service:**  
+  - **OpenAI API:** Used by the MCP server to analyze ingredients.
+  - **CosmosDB:** Used by the MCP server to store and retrieve analysis history.
+
+### Visual Mapping
+
+```plaintext
+[Browser/React App]  <--MCP Client-->  [MCP Server (Node.js/Express)]  <--->  [OpenAI API, CosmosDB]
+      |                                         |                                 (Remote Services)
+      |                                         |
+      |-- User interacts, triggers analysis ---> |-- Calls LLM, stores/fetches --> |
 ```
-[Browser/React App]
-     |
-     |  (calls analyzeIngredients in analysisService.ts)
-     v
-[analysisService.ts]  --HTTP-->  [MCP Server (server.js) on :3001]
-     ^
-     |  (calls saveAnalysisResult, fetchAnalysisHistory in mcpService.ts)
-     |
-[mcpService.ts]  --HTTP-->  [MCP Server (server.js) on :3001]
-```
 
-**The server never calls these services directly—they are HTTP clients used by the frontend.**
+---
 
-### System Diagram (MCP Pattern)
+## System Architecture
+
+> **Note:** Mermaid diagrams may not render on GitHub.  
+> Use VS Code with the Mermaid extension or [Mermaid Live Editor](https://mermaid.live/) to view.
+
+### High-Level MCP System Diagram
 
 ```mermaid
 flowchart TD
-    A[User uploads/takes photo] --> B[Frontend (React, OCR)]
-    B -->|Extracted ingredients, context| C[MCP Server (Node.js/Express)]
+    A[User uploads/takes photo] --> B[Frontend 
+    **React, OCR**]
+    B -->|Extracted ingredients, context| C[MCP Server **Node.js/Express**]
     C -->|Prompt, context| D[OpenAI LLM]
     D -->|Analysis result, citations| C
     C -->|Result| B
@@ -37,6 +87,17 @@ flowchart TD
     B -->|Fetch history| C
     C -->|History| B
 ```
+
+---
+
+## How the Frontend and Backend Communicate
+
+The React frontend uses two service modules to interact with the MCP server:
+
+- **`analysisService.ts`**: Handles the initial ingredient analysis. When a user uploads or captures an image, the frontend extracts the text and calls `analyzeIngredients`, which sends a POST request to the MCP server's `/analyze` endpoint.
+- **`mcpService.ts`**: Handles saving analysis results and fetching analysis history. After receiving the analysis result, the frontend calls `saveAnalysisResult` (to `/save`) and `fetchAnalysisHistory` (to `/history`).
+
+**The server never calls these services directly—they are HTTP clients used by the frontend.**
 
 ### Service Usage Flow
 
@@ -63,6 +124,7 @@ sequenceDiagram
     F-->>U: Updates UI
 ```
 
+---
 
 ## Features
 
@@ -75,6 +137,8 @@ sequenceDiagram
 - Store history of previous analyses
 - Simple, responsive design for both mobile and desktop
 
+---
+
 ## Getting Started
 
 ### Prerequisites
@@ -85,26 +149,26 @@ sequenceDiagram
 ### Installation
 
 1. Clone the repository:
-   ```
+   ```sh
    git clone https://github.com/yourusername/baby-food-analyzer.git
    cd baby-food-analyzer
    ```
 
 2. Install dependencies:
-   ```
+   ```sh
    npm install
    ```
 
-3. Add your OpenAI API key:
-   - Open `src/services/analysisService.ts`
-   - Update the `API_KEY` variable with your OpenAI API key
+3. (Optional) Add your OpenAI API key if you want to use direct LLM calls for development/testing.
 
 4. Start the development server:
-   ```
+   ```sh
    npm start
    ```
 
 5. Open [http://localhost:3000](http://localhost:3000) to view the app in your browser.
+
+---
 
 ## Deployment
 
@@ -114,18 +178,22 @@ This app can be easily deployed to Vercel:
 2. Connect your GitHub repository to Vercel
 3. Deploy!
 
+---
+
 ## Technologies Used
 
 - React with TypeScript
 - Tailwind CSS for styling
 - Tesseract.js for OCR
 - OpenAI API for ingredient analysis
-- Local Storage for saving analysis history
+- CosmosDB for persistent storage
+- Node.js/Express MCP server
 
-## License
+---
 
-MIT
+## License & Disclaimer
 
-## Disclaimer
+**License:** MIT
 
+**Disclaimer:**  
 This app is for informational purposes only and should not replace professional medical advice about your baby's nutrition.
