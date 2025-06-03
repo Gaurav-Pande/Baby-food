@@ -11,8 +11,6 @@ A modern web application that analyzes baby food ingredients for toddlers (1–3
   - [Table of Contents](#table-of-contents)
   - [What is MCP?](#what-is-mcp)
   - [MCP Terminology in This Solution](#mcp-terminology-in-this-solution)
-    - [In-Context Example](#in-context-example)
-    - [Visual Mapping](#visual-mapping)
   - [System Architecture](#system-architecture)
     - [High-Level MCP System Diagram](#high-level-mcp-system-diagram)
   - [How the Frontend and Backend Communicate](#how-the-frontend-and-backend-communicate)
@@ -46,25 +44,6 @@ Here’s how the general MCP concepts map to this project:
 | **MCP Server**      | Your Node.js/Express backend (`server.js`) that exposes `/analyze`, `/save`, and `/history` endpoints |
 | **Local Data Source** | (Not used in this demo, but could be local files/databases if the server accessed them)              |
 | **Remote Service**  | The OpenAI API (LLM) and CosmosDB, which your MCP server connects to for analysis and storage         |
-
-### In-Context Example
-
-- **MCP Host:**  The React web app running in the user’s browser, where the user uploads images and views results.
-- **MCP Client:**  The frontend service modules (`analysisService.ts` and `mcpService.ts`) that communicate with the backend using the MCP protocol (HTTP+JSON).
-- **MCP Server:**  The Node.js/Express app (`server.js`) that receives requests, orchestrates LLM calls, and manages data storage.
-- **Local Data Source:**  (Not present in this solution, but if your server accessed files on disk or a local database, those would be local data sources.)
-- **Remote Service:**  
-  - **OpenAI API:** Used by the MCP server to analyze ingredients.
-  - **CosmosDB:** Used by the MCP server to store and retrieve analysis history.
-
-### Visual Mapping
-
-```plaintext
-[Browser/React App]  <--MCP Client-->  [MCP Server (Node.js/Express)]  <--->  [OpenAI API, CosmosDB]
-      |                                         |                                 (Remote Services)
-      |                                         |
-      |-- User interacts, triggers analysis ---> |-- Calls LLM, stores/fetches --> |
-```
 
 ---
 
