@@ -2,6 +2,66 @@
 
 A web application that analyzes baby food ingredients to determine if they're healthy for babies aged 1-3 years.
 
+## How the Frontend Services Work Together
+
+The React frontend uses two service modules to communicate with the MCP server:
+
+- **`analysisService.ts`**: Handles the initial ingredient analysis. When a user uploads or captures an image, the frontend extracts the text and calls `analyzeIngredients` from this service, which sends a POST request to the MCP server's `/analyze` endpoint. The server returns the analysis result.
+
+- **`mcpService.ts`**: Handles saving analysis results and fetching analysis history. After receiving the analysis result, the frontend calls `saveAnalysisResult` to persist it (via the `/save` endpoint), and uses `fetchAnalysisHistory` to retrieve past results (via the `/history` endpoint).
+
+[Browser/React App]
+     |
+     |  (calls analyzeIngredients in analysisService.ts)
+     v
+[analysisService.ts]  --HTTP-->  [MCP Server (server.js) on :3001]
+     ^
+     |  (calls saveAnalysisResult, fetchAnalysisHistory in mcpService.ts)
+     |
+[mcpService.ts]  --HTTP-->  [MCP Server (server.js) on :3001]
+
+**The server never calls these services directly—they are HTTP clients used by the frontend.**
+
+### System Diagram (MCP Pattern)
+
+```mermaid
+flowchart TD
+    A[User uploads/takes photo] --> B[Frontend (React, OCR)]
+    B -->|Extracted ingredients, context| C[MCP Server (Node.js/Express)]
+    C -->|Prompt, context| D[OpenAI LLM]
+    D -->|Analysis result, citations| C
+    C -->|Result| B
+    C -->|Save result| E[CosmosDB]
+    B -->|Fetch history| C
+    C -->|History| B
+```
+
+### Service Usage Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User (Browser)
+    participant F as React App
+    participant A as analysisService.ts
+    participant M as mcpService.ts
+    participant S as MCP Server (server.js)
+
+    U->>F: Uploads or captures image
+    F->>A: Calls analyzeIngredients (ingredient text, profile)
+    A->>S: POST /analyze
+    S-->>A: Returns analysis result
+    A-->>F: Returns result
+    F->>M: Calls saveAnalysisResult (result)
+    M->>S: POST /save
+    S-->>M: Confirms save
+    F->>M: Calls fetchAnalysisHistory
+    M->>S: GET /history
+    S-->>M: Returns history
+    M-->>F: Returns history
+    F-->>U: Updates UI
+```
+
+
 ## Features
 
 - Take a photo or upload an image of food ingredient labels

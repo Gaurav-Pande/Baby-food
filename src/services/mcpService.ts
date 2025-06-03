@@ -4,7 +4,7 @@ import { AnalysisResult, Baby } from '../types';
 const MCP_API = 'http://localhost:3001';
 
 export const saveAnalysisResult = async (result: AnalysisResult) => {
-  const response = await fetch(`${MCP_API}/analyze`, {
+  const response = await fetch(`${MCP_API}/save`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(result),

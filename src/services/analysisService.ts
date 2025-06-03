@@ -8,26 +8,17 @@ const AZURE_OPENAI_ENDPOINT = ''; // <-- Replace with your Azure endpoint
 // This will be called with the text extracted from the image and baby info
 export const analyzeIngredients = async (
   ingredientsText: string,
-  babyProfile: Baby
+  babyProfile: Baby,
+  imageUrl?: string
 ): Promise<AnalysisResult> => {
-  try {
-    // Parse the ingredients (simple splitting for now)
-    const ingredients = parseIngredients(ingredientsText);
-
-    // Use OpenAI for real analysis
-    const analysis = await analyzeWithOpenAI(ingredients, babyProfile);
-
-    return {
-      id: uuidv4(),
-      timestamp: new Date().toISOString(),
-      imageUrl: '', // This will be set by the component
-      ingredients,
-      ...analysis
-    };
-  } catch (error) {
-    console.error('Error analyzing ingredients:', error);
-    throw new Error('Failed to analyze ingredients');
-  }
+  // Call MCP server for analysis (MCP orchestrates LLM and DB)
+  const response = await fetch('http://localhost:3001/analyze', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ingredientsText, babyProfile, imageUrl }),
+  });
+  if (!response.ok) throw new Error('Failed to analyze ingredients');
+  return response.json();
 };
 
 // Parse ingredients text into array of ingredients
